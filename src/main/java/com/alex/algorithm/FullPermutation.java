@@ -2,13 +2,13 @@ package com.alex.algorithm;
 
 import java.util.Arrays;
 
+/**
+ * 输入一个正整数（小于10），输出这个数的全排列
+ * 
+ * @author Alex Yang
+ *
+ */
 public class FullPermutation {
-	/**
-	 * input a positive whole integer, out put the full permutation of this
-	 * number.
-	 *
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		new FullPermutation(5);
 	}
