@@ -58,13 +58,15 @@ public class EightQueen {
 	}
 
 	/**
-	 * 回溯
+	 * 依次将第queenNo个皇后放在第i行，如果可以，放置下一个皇后，如果不可以，回溯，调整上一个皇后放置的行数。
+	 * 如果8个皇后都放置妥当，打印出各个皇后位置
 	 * 
 	 * @param queenNo
+	 *            第queenNo个皇后
 	 */
 	private void recall(int queenNo) {
 		if (queenNo == 8) {
-			// 八个皇后都可以放置后则放置皇后
+			// 八个皇后都放置妥当后打印各个皇后位置
 			displayQueens();
 			return;
 		} else {
