@@ -18,10 +18,10 @@ public class Send {
 		Channel channel = connection.createChannel();
 
 		channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-		String message = "Hello World again";
+		String message = "Hello World";
 		channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
 		System.out.println("X send '" + message + "'");
-		
+
 		channel.close();
 		connection.close();
 	}
