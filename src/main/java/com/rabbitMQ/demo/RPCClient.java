@@ -1,75 +1,75 @@
 package com.rabbitMQ.demo;
 
-import java.util.UUID;
-
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
+import java.util.UUID;
+
 public class RPCClient {
 
-	private Connection connection;
-	private Channel channel;
-	private String requestQueueName = "rpc_queue";
-	private String replyQueueName;
-	private QueueingConsumer consumer;
+    private Connection connection;
+    private Channel channel;
+    private String requestQueueName = "rpc_queue";
+    private String replyQueueName;
+    private QueueingConsumer consumer;
 
-	public RPCClient() throws Exception {
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("localhost");
-		connection = factory.newConnection();
-		channel = connection.createChannel();
+    public RPCClient() throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        connection = factory.newConnection();
+        channel = connection.createChannel();
 
-		replyQueueName = channel.queueDeclare().getQueue();
-		consumer = new QueueingConsumer(channel);
-		channel.basicConsume(replyQueueName, true, consumer);
-	}
+        replyQueueName = channel.queueDeclare().getQueue();
+        consumer = new QueueingConsumer(channel);
+        channel.basicConsume(replyQueueName, true, consumer);
+    }
 
-	public String call(String message) throws Exception {
-		String response = null;
-		String corrId = UUID.randomUUID().toString();
+    public static void main(String[] argv) {
+        RPCClient fibonacciRpc = null;
+        String response = null;
+        try {
+            fibonacciRpc = new RPCClient();
 
-		BasicProperties props = new BasicProperties.Builder()
-				.correlationId(corrId).replyTo(replyQueueName).build();
+            System.out.println(" [x] Requesting fib(30)");
+            response = fibonacciRpc.call("30");
+            System.out.println(" [.] Got '" + response + "'");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fibonacciRpc != null) {
+                try {
+                    fibonacciRpc.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
+    }
 
-		channel.basicPublish("", requestQueueName, props,
-				message.getBytes("UTF-8"));
+    public String call(String message) throws Exception {
+        String response = null;
+        String corrId = UUID.randomUUID().toString();
 
-		while (true) {
-			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-			if (delivery.getProperties().getCorrelationId().equals(corrId)) {
-				response = new String(delivery.getBody(), "UTF-8");
-				break;
-			}
-		}
+        BasicProperties props = new BasicProperties.Builder()
+                .correlationId(corrId).replyTo(replyQueueName).build();
 
-		return response;
-	}
+        channel.basicPublish("", requestQueueName, props,
+                message.getBytes("UTF-8"));
 
-	public void close() throws Exception {
-		connection.close();
-	}
+        while (true) {
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+            if (delivery.getProperties().getCorrelationId().equals(corrId)) {
+                response = new String(delivery.getBody(), "UTF-8");
+                break;
+            }
+        }
 
-	public static void main(String[] argv) {
-		RPCClient fibonacciRpc = null;
-		String response = null;
-		try {
-			fibonacciRpc = new RPCClient();
+        return response;
+    }
 
-			System.out.println(" [x] Requesting fib(30)");
-			response = fibonacciRpc.call("30");
-			System.out.println(" [.] Got '" + response + "'");
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (fibonacciRpc != null) {
-				try {
-					fibonacciRpc.close();
-				} catch (Exception ignore) {
-				}
-			}
-		}
-	}
+    public void close() throws Exception {
+        connection.close();
+    }
 }

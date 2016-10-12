@@ -7,30 +7,30 @@ import com.rabbitmq.client.QueueingConsumer;
 
 public class ReceiveLogs {
 
-	private static final String EXCHANGE_NAME = "logs";
+    private static final String EXCHANGE_NAME = "logs";
 
-	public static void main(String[] argv) throws Exception {
+    public static void main(String[] argv) throws Exception {
 
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost("localhost");
-		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
 
-		channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
-		String queueName = channel.queueDeclare().getQueue();
-		System.out.println(queueName);
-		channel.queueBind(queueName, EXCHANGE_NAME, "");
+        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        String queueName = channel.queueDeclare().getQueue();
+        System.out.println(queueName);
+        channel.queueBind(queueName, EXCHANGE_NAME, "");
 
-		System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
-		QueueingConsumer consumer = new QueueingConsumer(channel);
-		channel.basicConsume(queueName, true, consumer);
+        QueueingConsumer consumer = new QueueingConsumer(channel);
+        channel.basicConsume(queueName, true, consumer);
 
-		while (true) {
-			QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-			String message = new String(delivery.getBody(), "UTF-8");
+        while (true) {
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+            String message = new String(delivery.getBody(), "UTF-8");
 
-			System.out.println(" [x] Received '" + message + "'");
-		}
-	}
+            System.out.println(" [x] Received '" + message + "'");
+        }
+    }
 }
